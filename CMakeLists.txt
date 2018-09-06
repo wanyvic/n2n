@@ -1,6 +1,6 @@
 project(n2n)
 cmake_minimum_required(VERSION 2.6)
-
+set (LIBRARY_OUTPUT_PATH ../.lib)
 # N2n information
 set(N2N_VERSION 2.1.0)
 set(N2N_OSNAME ${CMAKE_SYSTEM})
@@ -15,6 +15,7 @@ endif(NOT WIN32)
 endif(NOT DEFINED N2N_OPTION_AES)
 
 add_definitions(-DN2N_VERSION=\"${N2N_VERSION}\" -DN2N_OSNAME=\"${N2N_OSNAME}\")
+include_directories(include)
 
 if(N2N_OPTION_AES)
 add_definitions(-DN2N_HAVE_AES)
@@ -66,23 +67,23 @@ endif(APPLE)
 #message(${N2N_OPTION_AES})
 ## DEBUG FOR CMAKE
 
-add_library(n2n n2n.c
-                n2n_keyfile.c
-                wire.c
-                minilzo.c
-                twofish.c
-                transform_null.c
-                transform_tf.c
-                transform_aes.c
-                tuntap_freebsd.c
-                tuntap_netbsd.c
-                tuntap_linux.c
-                tuntap_osx.c
-                version.c
+add_library(n2n src/n2n.c
+                src/n2n_keyfile.c
+                src/wire.c
+                src/minilzo.c
+                src/twofish.c
+                src/transform_null.c
+                src/transform_tf.c
+                src/transform_aes.c
+                src/tuntap_freebsd.c
+                src/tuntap_netbsd.c
+                src/tuntap_linux.c
+                src/tuntap_osx.c
+                src/version.c
             )
 
 if(NOT WIN32)
-add_library(scm unix-scm.c)
+add_library(scm src/unix-scm.c)
 target_link_libraries(n2n scm)
 endif(NOT WIN32)
 
@@ -99,19 +100,21 @@ endif(N2N_OPTION_AES)
 # For Solaris (or OpenSolaris?)
 #target_link_libraries(n2n socket nsl)
 
-add_executable(edge edge.c)
+option(${BUILD_EXECUTABLE} "BUILD_EXECUTABLE" OFF)
+if(BUILD_EXECUTABLE)
+add_executable(edge src/edge.c)
 target_link_libraries(edge n2n)
 
-add_executable(supernode sn.c)
+add_executable(supernode src/sn.c)
 target_link_libraries(supernode n2n)
 
-add_executable(n2n_test n2n_test.c)
+add_executable(n2n_test src/n2n_test.c)
 target_link_libraries(n2n_test n2n)
 
-add_executable(benchmark benchmark.c)
+add_executable(benchmark src/benchmark.c)
 target_link_libraries(benchmark n2n)
 
-add_executable(benchmark_hashtable benchmark_hashtable.c)
+add_executable(benchmark_hashtable src/benchmark_hashtable.c)
 target_link_libraries(benchmark_hashtable n2n)
 
 install(TARGETS edge supernode
@@ -119,7 +122,8 @@ install(TARGETS edge supernode
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
        )
-
+else()
+endif()
 # Documentation
 if(DEFINED UNIX)
 add_dependencies(n2n doc)
