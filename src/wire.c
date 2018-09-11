@@ -10,7 +10,7 @@
  *  example.
  */
 
-#include "n2n_wire.h"
+#include "../include/n2n_wire.h"
 #include <string.h>
 
 int encode_uint8( uint8_t * base, 

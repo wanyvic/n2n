@@ -8,7 +8,7 @@
  */
 
 
-#include "n2n.h"
+#include "../include/n2n.h"
 
 
 #define N2N_SN_LPORT_DEFAULT 7654
@@ -16,7 +16,16 @@
 
 #define N2N_SN_MGMT_PORT                5645
 
-
+#ifdef __linux__
+static void handle_accpet(int epollfd,int listenfd);
+static int do_read(int epollfd,int fd,int islistenfd);
+static void do_write(int epollfd,int fd);
+static void add_event(int epollfd,int fd,int state);
+static void delete_event(int epollfd,int fd,int state);
+static void modify_event(int epollfd,int fd,int state);
+static int handle_events(int epollfd,struct epoll_event *events,int num,int listenfd,int mgmtfd);
+static int do_epoll(int listenfd,int mgmtfd);
+#endif
 struct sn_stats
 {
     size_t errors;              /* Number of errors encountered. */
@@ -700,12 +709,12 @@ static const struct option long_options[] = {
   { "verbose",         no_argument,       NULL, 'v' },
   { NULL,              0,                 NULL,  0  }
 };
-
+static n2n_sn_t* ss;
 /** Main program entry point from kernel. */
 int main( int argc, char * const argv[] )
 {
     n2n_sn_t sss;
-
+    ss = &sss;
 #ifndef WIN32
     uid_t   userid=0; /* root is the only guaranteed ID */
     gid_t   groupid=0; /* root is the only guaranteed ID */
@@ -796,11 +805,112 @@ int main( int argc, char * const argv[] )
     }
 #endif
     traceEvent(TRACE_NORMAL, "supernode started");
-
+#ifdef __linux__
+    return do_epoll(sss.sock,sss.mgmt_sock);
+#elif
     return run_loop(&sss);
+#endif
+}
+#ifdef __linux__
+static int do_read(int epollfd,int fd,int islistenfd)
+{
+    int nread = 0,n = 0;
+    time_t now = time(NULL);
+    struct sockaddr_in  sender_sock;
+    char buf[N2N_SN_PKTBUF_SIZE];
+    memset(buf,0,N2N_SN_PKTBUF_SIZE);
+    socklen_t i = sizeof(sender_sock);
+    while ((nread = recvfrom( fd, buf, N2N_SN_PKTBUF_SIZE, 0/*flags*/,
+         	  (struct sockaddr *)&sender_sock, (socklen_t*)&i)) > 0) {
+        n += nread;
+    }
+    if (nread == -1 && errno != EAGAIN) {
+        close(fd);
+        delete_event(epollfd,fd,EPOLLIN);
+        return -1;
+    }
+    else if (nread == 0)
+    {
+        traceEvent(TRACE_NORMAL,"client close.\n");
+        close(fd);
+        delete_event(epollfd,fd,EPOLLIN);
+        return -1;
+    }
+    else
+    {
+        if(islistenfd)
+            process_udp( ss, &sender_sock, buf, n, now );
+        else
+            process_mgmt( ss, &sender_sock, buf, n, now );
+        if ((now - ss->last_purge) >= PURGE_REGISTRATION_FREQUENCY) {
+            hashed_purge_expired_registrations( ss->edges );
+            ss->last_purge = now;
+        }
+    }
+    return 0;
 }
 
+static void add_event(int epollfd,int fd,int state)
+{
+    struct epoll_event ev;
+    ev.events = state;
+    ev.data.fd = fd;
+    epoll_ctl(epollfd,EPOLL_CTL_ADD,fd,&ev);
+}
 
+static void delete_event(int epollfd,int fd,int state)
+{
+    struct epoll_event ev;
+    ev.events = state;
+    ev.data.fd = fd;
+    epoll_ctl(epollfd,EPOLL_CTL_DEL,fd,&ev);
+}
+
+static void modify_event(int epollfd,int fd,int state)
+{
+    struct epoll_event ev;
+    ev.events = state;
+    ev.data.fd = fd;
+    epoll_ctl(epollfd,EPOLL_CTL_MOD,fd,&ev);
+}
+static int handle_events(int epollfd,struct epoll_event *events,int num,int listenfd,int mgmtfd)
+{
+    int i,fd,ret;
+    for (i = 0;i < num;i++)
+    {
+        fd = events[i].data.fd;
+        if ((fd == listenfd) &&events[i].events & EPOLLIN){
+            if(ret=do_read(epollfd,fd,1)!=0)
+                return ret;
+        }
+        else if ((fd == mgmtfd) &&events[i].events & EPOLLIN){
+            if(ret=do_read(epollfd,fd,0)!=0)
+                return ret;
+        }
+        else
+            traceEvent(TRACE_ERROR,"error events");
+    }
+    return 0;
+}
+
+static int do_epoll(int listenfd,int mgmtfd)
+{
+    int epollfd,ret;
+    struct epoll_event events[EPOLLEVENTS];
+    epollfd = epoll_create(FDSIZE);
+    add_event(epollfd,listenfd,EPOLLIN);
+    add_event(epollfd,mgmtfd,EPOLLIN);
+    while(1)
+    {
+        ret = epoll_wait(epollfd,events,EPOLLEVENTS,-1);
+        if(handle_events(epollfd,events,ret,listenfd,mgmtfd)!=0)
+            break;
+    }
+    close(epollfd);
+    deinit_sn( ss );
+    return 0;
+}
+#endif
 /** Long lived processing entry point. Split out from main to simply
  *  daemonisation on some platforms. */
 static int run_loop( n2n_sn_t * sss )

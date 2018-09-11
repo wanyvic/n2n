@@ -1,6 +1,6 @@
-#include "n2n_wire.h"
+#include "../include/n2n_wire.h"
 #include "n2n_transforms.h"
-#include "n2n.h"
+#include "../include/n2n.h"
 
 #ifndef WIN32
 #include <sys/time.h>

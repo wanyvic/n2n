@@ -23,7 +23,7 @@
  *
  */
 
-#include "n2n.h"
+#include "../include/n2n.h"
 #include "n2n_transforms.h"
 #include <assert.h>
 #include <sys/stat.h>

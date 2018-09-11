@@ -81,6 +81,9 @@ extern "C" {
 #include <pthread.h>
 
 #ifdef __linux__
+#define FDSIZE      10000
+#define EPOLLEVENTS 1000
+#include <sys/epoll.h>
 #include <linux/if.h>
 #include <linux/if_tun.h>
 #define N2N_CAN_NAME_IFACE 1
@@ -130,7 +133,7 @@ typedef struct ether_hdr ether_hdr_t;
 /* include sglib for hash tables */
 #include "sglib.h"
 
-#include "n2n_wire.h"
+#include "../include/n2n_wire.h"
 
 /* N2N_IFNAMSIZ is needed on win32 even if dev_name is not used after declaration */
 #define N2N_IFNAMSIZ            16 /* 15 chars * NULL */

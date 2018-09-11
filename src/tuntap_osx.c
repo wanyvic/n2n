@@ -15,7 +15,7 @@
  * along with this program; if not see see <http://www.gnu.org/licenses/>
  */
 
-#include "n2n.h"
+#include "../include/n2n.h"
 
 #ifdef _DARWIN_
 

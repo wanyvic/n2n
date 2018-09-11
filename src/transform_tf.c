@@ -1,6 +1,6 @@
 /* (c) 2009 Richard Andrews <andrews@ntop.org> */
 
-#include "n2n.h"
+#include "../include/n2n.h"
 #include "n2n_transforms.h"
 #include "twofish.h"
 #ifndef _MSC_VER

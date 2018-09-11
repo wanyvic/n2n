@@ -21,7 +21,7 @@
  *
  */
 
-#include "n2n.h"
+#include "../include/n2n.h"
 
 #include "minilzo.h"
 
@@ -73,8 +73,8 @@ SOCKET open_socket(int local_port, int bind_any) {
     return(-1);
   }
 
-#ifndef WIN32
-  /* fcntl(sock_fd, F_SETFL, O_NONBLOCK); */
+#ifdef __linux__
+  fcntl(sock_fd, F_SETFL, O_NONBLOCK); 
 #endif
 
   setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&sockopt, sizeof(sockopt));

@@ -1,4 +1,4 @@
-#include "n2n.h"
+#include "../include/n2n.h"
 #include "n2n_keyfile.h"
 #include <assert.h>
 #include <stdio.h>
