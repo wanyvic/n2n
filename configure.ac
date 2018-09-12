@@ -1,5 +1,8 @@
 AC_PREREQ([2.69])
-AC_INIT([libn2n],[0.1])
+define(_LIBN2N_VERSION_MAJOR, 2)
+define(_LIBN2N_VERSION_MINOR, 1)
+define(_LIBN2N_VERSION_REVISION, 0)
+AC_INIT([libn2n],[_LIBN2N_VERSION_MAJOR._LIBN2N_VERSION_MINOR._LIBN2N_VERSION_REVISION],[https://github.com/wanyvic/libn2n])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux/m4])
 AC_CANONICAL_HOST
@@ -9,6 +12,7 @@ AH_BOTTOM([#endif /*LIBN2N_CONFIG_H*/])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 LT_INIT
 
+libn2n_version=_LIBN2N_VERSION_MAJOR._LIBN2N_VERSION_MINOR._LIBN2N_VERSION_REVISION
 dnl make the compilation flags quiet unless V=1 is used
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -17,7 +21,7 @@ PKG_PROG_PKG_CONFIG
 AC_PATH_TOOL(AR, ar)
 AC_PATH_TOOL(RANLIB, ranlib)
 AC_PATH_TOOL(STRIP, strip)
-AX_PROG_CC_FOR_BUILD
+Ax_PROG_CC_FOR_BUILD
 
 if test "x$CFLAGS" = "x"; then
   CFLAGS="-O3 -g"
@@ -30,30 +34,63 @@ if test x"$ac_cv_prog_cc_c99" = x"no"; then
   AC_MSG_ERROR([c99 compiler support required])
 fi
 
+# Checks for libraries.
+AC_CHECK_LIB([ssl],         [main],SSL_LIBS=-lssl, AC_MSG_ERROR(libssl missing))
+
+# Checks for header files.
+
+AC_CHECK_HEADER([openssl/ssl.h],, AC_MSG_ERROR(libssl headers missing),)
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h libintl.h limits.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h strings.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
+AC_TYPE_UID_T
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_INT64_T
+AC_TYPE_INT8_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT8_T
+AC_CHECK_TYPES([ptrdiff_t])
+
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([gettimeofday memmove memset select socket strchr strdup strerror strpbrk strtol strtoul])
+AC_OUTPUT
+
+
+build_linux=no
+build_windows=no
+build_mac=no
+
 # Detect the target system
 case "${host_os}" in
     linux*)
         build_linux=yes
-        AM_CONDITIONAL([NN2N_LINUX],[""])
-        AC_SUBST(NN2N_VERSION,[v2.1.0])
         ;;
     cygwin*|mingw*)
         build_windows=yes
-
-        AM_CONDITIONAL([NN2N_WIN32],[""])
         ;;
     darwin*)
         build_mac=yes
-        AM_CONDITIONAL([NN2N_MAC],[""])
         ;;
     *)
         AC_MSG_ERROR(["OS $host_os is not supported"])
         ;;
 esac
 
+# Pass the conditionals to automake
+AM_CONDITIONAL([LINUX], [test "$build_linux" = "yes"])
+AM_CONDITIONAL([WINDOWS], [test "$build_windows" = "yes"])
+AM_CONDITIONAL([OSX], [test "$build_mac" = "yes"])
+
 CFLAGS="$CFLAGS -W"
 
-warn_CFLAGS="-std=c99 -pedantic -Wall -Wextra -Wcast-align -Wnested-externs -Wshadow -Wstrict-prototypes -Wno-unused-function -Wno-long-long -Wno-overlength-strings"
+warn_CFLAGS="-pedantic -Wall -Wextra -Wcast-align -Wnested-externs -Wshadow -Wstrict-prototypes -Wno-unused-function -Wno-long-long -Wno-overlength-strings"
 saved_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $warn_CFLAGS"
 AC_MSG_CHECKING([if ${CC} supports ${warn_CFLAGS}])
@@ -64,7 +101,10 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([[char foo;]])],
     ])
 
 saved_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -fvisibility=hidden"
+CFLAGS="$CFLAGS -fvisibility=hidden -DN2N_VERSION=\\\"${libn2n_version}\\\" -DN2N_OSNAME=\\\"${host_cpu}-${host_os}\\\""
+ifndef WINDOWS
+CFLAGS="$CFLAGS -DN2N_HAVE_AES"
+endif
 AC_MSG_CHECKING([if ${CC} supports -fvisibility=hidden])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([[char foo;]])],
     [ AC_MSG_RESULT([yes]) ],
@@ -77,16 +117,16 @@ AC_ARG_ENABLE(benchmark,
     [use_benchmark=$enableval],
     [use_benchmark=no])
 
-AC_ARG_ENABLE(tests,
-    AS_HELP_STRING([--enable-tests],[compile tests (default is no)]),
-    [use_tests=$enableval],
-    [use_tests=no])
+AC_ARG_ENABLE(test,
+    AS_HELP_STRING([--enable-test],[compile test (default is no)]),
+    [use_test=$enableval],
+    [use_test=no])
 
 AC_ARG_ENABLE([executale],
   [AS_HELP_STRING([--enable-executale],
   [enable build executale (disabled by default)])],
-  [enable_wallet=$enableval],
-  [enable_wallet=no])
+  [use_executale=$enableval],
+  [use_executale=no])
 
 AC_MSG_CHECKING([for __builtin_expect])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([[void myfunc() {__builtin_expect(0,0);}]])],
@@ -97,9 +137,10 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([[void myfunc() {__builtin_expect(0,0);}]])],
 AC_C_BIGENDIAN()
 
 AM_CONDITIONAL([USE_BENCHMARK], [test x"$use_benchmark" = x"yes"])
-AM_CONDITIONAL([USE_TESTS], [test x"$use_tests" = x"yes"])
+AM_CONDITIONAL([USE_TEST], [test x"$use_test" = x"yes"])
+AM_CONDITIONAL([USE_EXECUTALE], [test x"$use_executale" = x"yes"])
 AC_CONFIG_HEADERS([src/libn2n-config.h])
-AC_CONFIG_FILES([Makefile src/Makefile libn2n.pc])
+AC_CONFIG_FILES([Makefile src/Makefile src/libn2n.pc])
 AC_SUBST(SECP_LIBS)
 AC_SUBST(SECP_TEST_LIBS)
 AC_SUBST(SECP_TEST_INCLUDES)
