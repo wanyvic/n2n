@@ -31,7 +31,6 @@ if WINDOWS
     libn2n_la_SOURCES += ../win32/win-scm.c
 else 
     libn2n_la_SOURCES += unix-scm.c
-    # libn2n_la_CFLAGS ="-DN2N_HAVE_AES"
 endif
 libn2n_la_CFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src
 libn2n_la_LIBADD =

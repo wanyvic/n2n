@@ -35,11 +35,13 @@ if test x"$ac_cv_prog_cc_c99" = x"no"; then
 fi
 
 # Checks for libraries.
+if test x$enable_aes != xno; then
 AC_CHECK_LIB([ssl],         [main],SSL_LIBS=-lssl, AC_MSG_ERROR(libssl missing))
-
+fi
 # Checks for header files.
-
+if test x$enable_aes != xno; then
 AC_CHECK_HEADER([openssl/ssl.h],, AC_MSG_ERROR(libssl headers missing),)
+fi
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h libintl.h limits.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h strings.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -102,9 +104,9 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([[char foo;]])],
 
 saved_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -fvisibility=hidden -DN2N_VERSION=\\\"${libn2n_version}\\\" -DN2N_OSNAME=\\\"${host_cpu}-${host_os}\\\""
-ifndef WINDOWS
+if test x$enable_aes != xno; then
 CFLAGS="$CFLAGS -DN2N_HAVE_AES"
-endif
+fi
 AC_MSG_CHECKING([if ${CC} supports -fvisibility=hidden])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([[char foo;]])],
     [ AC_MSG_RESULT([yes]) ],
@@ -127,6 +129,12 @@ AC_ARG_ENABLE([executale],
   [enable build executale (disabled by default)])],
   [use_executale=$enableval],
   [use_executale=no])
+
+AC_ARG_ENABLE([aes],
+  [AS_HELP_STRING([--disable-aes],
+  [disable aes (enabled by default need openssl)])],
+  [enable_aes=$enableval],
+  [enable_aes=yes])
 
 AC_MSG_CHECKING([for __builtin_expect])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([[void myfunc() {__builtin_expect(0,0);}]])],
