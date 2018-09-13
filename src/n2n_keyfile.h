@@ -59,7 +59,7 @@
 #define N2N_KEYFILE_H_
 
 
-#include "../include/n2n_wire.h"
+#include "n2n_wire.h"
 #include <time.h>
 
 #define N2N_MAX_KEYSIZE         256             /* bytes */

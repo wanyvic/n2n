@@ -41,28 +41,28 @@ if USE_BENCHMARK
 noinst_PROGRAMS += benchmark benchmark_hashtable
 benchmark_SOURCES = benchmark.c
 benchmark_LDADD = libn2n.la
-benchmark_CFLAGS = -static
+benchmark_CFLAGS = -I$(top_srcdir)/include -static 
 benchmark_hashtable_SOURCES = benchmark_hashtable.c
 benchmark_hashtable_LDADD = libn2n.la
-benchmark_hashtable_CFLAGS = -static
+benchmark_hashtable_CFLAGS = -I$(top_srcdir)/include -static
 endif
 
 if USE_TEST
 noinst_PROGRAMS += n2n_test
 n2n_test_SOURCES = n2n_test.c
 n2n_test_LDADD = libn2n.la
-n2n_test_CFLAGS = -static
+n2n_test_CFLAGS = -I$(top_srcdir)/include -static
 TESTS = n2n_test
 endif
 
-if USE_EXECUTALE
-noinst_PROGRAMS += edge supernode
+if USE_EXECUTABLE
+bin_PROGRAMS += edge supernode
 edge_SOURCES = edge.c
-edge_LDADD = libn2n.la
-edge_CFLAGS = -static
+edge_LDADD = libn2n.la $(CRYPTO_LIBS)
+edge_CFLAGS = -I$(top_srcdir)/include -static
 supernode_SOURCES = sn.c
 supernode_LDADD = libn2n.la
-supernode_CFLAGS = -static
+supernode_CFLAGS = -I$(top_srcdir)/include -static
 endif
 
 EXTRA_DIST = autogen.sh

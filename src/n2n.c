@@ -21,7 +21,7 @@
  *
  */
 
-#include "../include/n2n.h"
+#include "n2n.h"
 
 #include "minilzo.h"
 

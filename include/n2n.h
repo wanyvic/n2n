@@ -133,7 +133,7 @@ typedef struct ether_hdr ether_hdr_t;
 /* include sglib for hash tables */
 #include "sglib.h"
 
-#include "../include/n2n_wire.h"
+#include "n2n_wire.h"
 
 /* N2N_IFNAMSIZ is needed on win32 even if dev_name is not used after declaration */
 #define N2N_IFNAMSIZ            16 /* 15 chars * NULL */

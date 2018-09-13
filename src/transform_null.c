@@ -1,6 +1,6 @@
 /* (c) 2009 Richard Andrews <andrews@ntop.org> */
 
-#include "../include/n2n.h"
+#include "n2n.h"
 #include "n2n_transforms.h"
 
 static int transop_deinit_null( n2n_trans_op_t * arg )

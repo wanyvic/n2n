@@ -4,7 +4,7 @@
 #define N2N_TRANSFORMS_H_
 
 #include "n2n_keyfile.h"
-#include "../include/n2n_wire.h"
+#include "n2n_wire.h"
 
 
 #define N2N_TRANSFORM_ID_INVAL          0       /* marks uninitialised data */

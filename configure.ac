@@ -36,11 +36,11 @@ fi
 
 # Checks for libraries.
 if test x$enable_aes != xno; then
-AC_CHECK_LIB([ssl],         [main],SSL_LIBS=-lssl, AC_MSG_ERROR(libssl missing))
+AC_CHECK_LIB([crypto],[main],CRYPTO_LIBS=-lcrypto, AC_MSG_ERROR(libcrypto missing))
 fi
 # Checks for header files.
 if test x$enable_aes != xno; then
-AC_CHECK_HEADER([openssl/ssl.h],, AC_MSG_ERROR(libssl headers missing),)
+AC_CHECK_HEADER([openssl/aes.h],,AC_MSG_ERROR(libcrypto headers missing))
 fi
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h libintl.h limits.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h strings.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
 
@@ -124,11 +124,11 @@ AC_ARG_ENABLE(test,
     [use_test=$enableval],
     [use_test=no])
 
-AC_ARG_ENABLE([executale],
-  [AS_HELP_STRING([--enable-executale],
-  [enable build executale (disabled by default)])],
-  [use_executale=$enableval],
-  [use_executale=no])
+AC_ARG_ENABLE([executable],
+  [AS_HELP_STRING([--enable-executable],
+  [enable build executable (disabled by default)])],
+  [use_executable=$enableval],
+  [use_executable=no])
 
 AC_ARG_ENABLE([aes],
   [AS_HELP_STRING([--disable-aes],
@@ -146,12 +146,10 @@ AC_C_BIGENDIAN()
 
 AM_CONDITIONAL([USE_BENCHMARK], [test x"$use_benchmark" = x"yes"])
 AM_CONDITIONAL([USE_TEST], [test x"$use_test" = x"yes"])
-AM_CONDITIONAL([USE_EXECUTALE], [test x"$use_executale" = x"yes"])
+AM_CONDITIONAL([USE_EXECUTABLE], [test x"$use_executable" = x"yes"])
 AC_CONFIG_HEADERS([src/libn2n-config.h])
 AC_CONFIG_FILES([Makefile src/Makefile src/libn2n.pc])
-AC_SUBST(SECP_LIBS)
-AC_SUBST(SECP_TEST_LIBS)
-AC_SUBST(SECP_TEST_INCLUDES)
+AC_SUBST(CRYPTO_LIBS)
 
 dnl make sure nothing new is exported so that we don't break the cache
 PKGCONFIG_PATH_TEMP="$PKG_CONFIG_PATH"

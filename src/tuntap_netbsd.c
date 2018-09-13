@@ -16,7 +16,7 @@
  * along with this program; if not see see <http://www.gnu.org/licenses/>
  */
 
-#include "../include/n2n.h"
+#include "n2n.h"
 
 #ifdef __NetBSD__
 

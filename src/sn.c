@@ -8,7 +8,7 @@
  */
 
 
-#include "../include/n2n.h"
+#include "n2n.h"
 
 
 #define N2N_SN_LPORT_DEFAULT 7654

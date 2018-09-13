@@ -3,9 +3,9 @@
  *     - Jozef Kralik
  */
 
-#include "../include/n2n.h"
+#include "n2n.h"
 #include "n2n_transforms.h"
-
+#define N2N_HAVE_AES 
 #if defined(N2N_HAVE_AES)
 
 
