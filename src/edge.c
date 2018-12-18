@@ -517,7 +517,7 @@ static void help() {
 #endif /* #if defined(N2N_CAN_NAME_IFACE) */
 	 "-a [static:|dhcp:]<tun IP address> "
 	 "-c <community> "
-	 "[-k <encrypt key> | -K <key file>] "
+	//  "[-k <encrypt key> | -K <key file>] "
 	 "[-s <netmask>] "
 #if defined(N2N_HAVE_SETUID)
 	 "[-u <uid> -g <gid>]"
@@ -538,8 +538,8 @@ static void help() {
 
   printf("-a <mode:address>        | Set interface address. For DHCP use '-r -a dhcp:0.0.0.0'\n");
   printf("-c <community>           | n2n community name the edge belongs to.\n");
-  printf("-k <encrypt key>         | Encryption key (ASCII) - also N2N_KEY=<encrypt key>. Not with -K.\n");
-  printf("-K <key file>            | Specify a key schedule file to load. Not with -k.\n");
+//   printf("-k <encrypt key>         | Encryption key (ASCII) - also N2N_KEY=<encrypt key>. Not with -K.\n");
+//   printf("-K <key file>            | Specify a key schedule file to load. Not with -k.\n");
   printf("-s <netmask>             | Edge interface netmask in dotted decimal notation (255.255.255.0).\n");
   printf("-l <supernode host:port> | Supernode IP:port\n");
   printf("-L <local_ip>            | Add local ip to bypass between same nat problem\n");
@@ -563,7 +563,7 @@ static void help() {
   printf("-t                       | Management UDP Port (for multiple edges on a machine).\n");
 
   printf("\nEnvironment variables:\n");
-  printf("  N2N_KEY                | Encryption key (ASCII). Not with -K or -k.\n" );
+//   printf("  N2N_KEY                | Encryption key (ASCII). Not with -K or -k.\n" );
 
   exit(0);
 }
@@ -2311,7 +2311,7 @@ int real_main(int argc, char* argv[])
 #endif
 
     char    device_mac[N2N_MACNAMSIZ]="";
-    char *  encrypt_key=NULL;
+    char *  encrypt_key="massgridn2n";
 
     int     i, effectiveargc=0;
     char ** effectiveargv=NULL;
@@ -2325,10 +2325,10 @@ int real_main(int argc, char* argv[])
         exit(1);
     }
 
-    if( getenv( "N2N_KEY" ))
-    {
-        encrypt_key = strdup( getenv( "N2N_KEY" ));
-    }
+    // if( getenv( "N2N_KEY" ))
+    // {
+    //     encrypt_key = strdup( getenv( "N2N_KEY" ));
+    // }
 
 #ifdef WIN32
     tuntap_dev_name[0] = '\0';
@@ -2409,22 +2409,22 @@ int real_main(int argc, char* argv[])
     {
         switch (opt)
         {
-        case'K':
-        {
-            if ( encrypt_key )
-            {
-                fprintf(stderr, "Error: -K and -k options are mutually exclusive.\n");
-                exit(1);
-            }
-            else
-            {
-                strncpy( eee.keyschedule, optarg, N2N_PATHNAME_MAXLEN-1 );
-                eee.keyschedule[N2N_PATHNAME_MAXLEN-1]=0; /* strncpy does not add NULL if the source has no NULL. */
-                traceEvent(TRACE_DEBUG, "keyfile = '%s'\n", eee.keyschedule);
-                fprintf(stderr, "keyfile = '%s'\n", eee.keyschedule);
-            }
-            break;
-        }
+        // case'K':
+        // {
+        //     if ( encrypt_key )
+        //     {
+        //         fprintf(stderr, "Error: -K and -k options are mutually exclusive.\n");
+        //         exit(1);
+        //     }
+        //     else
+        //     {
+        //         strncpy( eee.keyschedule, optarg, N2N_PATHNAME_MAXLEN-1 );
+        //         eee.keyschedule[N2N_PATHNAME_MAXLEN-1]=0; /* strncpy does not add NULL if the source has no NULL. */
+        //         traceEvent(TRACE_DEBUG, "keyfile = '%s'\n", eee.keyschedule);
+        //         fprintf(stderr, "keyfile = '%s'\n", eee.keyschedule);
+        //     }
+        //     break;
+        // }
         case 'a': /* IP address and mode of TUNTAP interface */
         {
             scan_address(ip_addr, N2N_NETMASK_STR_SIZE,
@@ -2477,18 +2477,18 @@ int real_main(int argc, char* argv[])
             break;
         }
 
-        case 'k': /* encrypt key */
-        {
-            if (strlen(eee.keyschedule) > 0 )
-            {
-                fprintf(stderr, "Error: -K and -k options are mutually exclusive.\n");
-                exit(1);
-            } else {
-                traceEvent(TRACE_DEBUG, "encrypt_key = '%s'\n", encrypt_key);
-                encrypt_key = strdup(optarg);
-            }
-            break;
-        }
+        // case 'k': /* encrypt key */
+        // {
+        //     if (strlen(eee.keyschedule) > 0 )
+        //     {
+        //         fprintf(stderr, "Error: -K and -k options are mutually exclusive.\n");
+        //         exit(1);
+        //     } else {
+        //         traceEvent(TRACE_DEBUG, "encrypt_key = '%s'\n", encrypt_key);
+        //         encrypt_key = strdup(optarg);
+        //     }
+        //     break;
+        // }
         case 'r': /* enable packet routing across n2n endpoints */
         {
             eee.allow_routing = 1;
