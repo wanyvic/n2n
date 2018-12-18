@@ -540,7 +540,7 @@ static void help() {
   printf("-c <community>           | n2n community name the edge belongs to.\n");
 //   printf("-k <encrypt key>         | Encryption key (ASCII) - also N2N_KEY=<encrypt key>. Not with -K.\n");
 //   printf("-K <key file>            | Specify a key schedule file to load. Not with -k.\n");
-  printf("-s <netmask>             | Edge interface netmask in dotted decimal notation (255.255.255.0).\n");
+  printf("-s <netmask>             | Edge interface netmask in dotted decimal notation (255.255.0.0).\n");
   printf("-l <supernode host:port> | Supernode IP:port\n");
   printf("-L <local_ip>            | Add local ip to bypass between same nat problem\n");
   printf("-i <interval>            | Set the NAT hole-punch interval (default 20seconds)\n");
@@ -2301,7 +2301,7 @@ int real_main(int argc, char* argv[])
     char    tuntap_dev_name[N2N_IFNAMSIZ] = "edge0";
     char    ip_mode[N2N_IF_MODE_SIZE]="static";
     char    ip_addr[N2N_NETMASK_STR_SIZE] = "";
-    char    netmask[N2N_NETMASK_STR_SIZE]="255.255.255.0";
+    char    netmask[N2N_NETMASK_STR_SIZE]="255.255.0.0";
     int     mtu = DEFAULT_MTU;
     int     got_s = 0;
 

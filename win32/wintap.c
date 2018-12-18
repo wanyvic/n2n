@@ -287,7 +287,7 @@ int main(int argc, char* argv[]) {
 
   printf("Welcome to n2n\n");
   initWin32();
-  open_wintap(&tuntap, "static", "1.2.3.20", "255.255.255.0", mtu);
+  open_wintap(&tuntap, "static", "1.2.3.20", "255.255.0.0", mtu);
 
   for(i=0; i<10; i++) {
     u_char buf[MTU];
