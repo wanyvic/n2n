@@ -78,3 +78,4 @@ test
 *.vcxproj.filters
 *.vcxproj.user
 ~$
+libn2n-config.h.in

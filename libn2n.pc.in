@@ -5,7 +5,7 @@ includedir=@includedir@
 
 Name: libn2n
 Description: Optimized C library for EC operations on curve n2n
-URL: https://github.com/wanyvic/libn2n
+URL: https://github.com/wanyvic/n2n
 Version: @PACKAGE_VERSION@
 Cflags: -I${includedir}
 Libs.private: @SECP_LIBS@
